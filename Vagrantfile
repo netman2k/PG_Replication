@@ -16,7 +16,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Master
   config.vm.define "master" do |node|
     node.vm.network "private_network", ip: "192.168.200.2"
-		#node.vm.provision "shell", inline: 'apt-get update'
     node.vm.provision "shell", path: "bootstrap.sh"
     node.vm.hostname = "master"
 		node.vm.provider "virtualbox" do |v|
@@ -32,7 +31,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Slave1
   config.vm.define "slave1" do |node|
     node.vm.network "private_network", ip: "192.168.200.3"
-		#node.vm.provision "shell", inline: 'apt-get update'
     node.vm.provision "shell", path: "bootstrap.sh"
     node.vm.hostname = "slave1"
 		node.vm.provider "virtualbox" do |v|
@@ -48,7 +46,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Slave2
   config.vm.define "slave2" do |node|
     node.vm.network "private_network", ip: "192.168.200.4"
-		#node.vm.provision "shell", inline: 'apt-get update'
     node.vm.provision "shell", path: "bootstrap.sh"
     node.vm.hostname = "slave2"
 		node.vm.provider "virtualbox" do |v|
@@ -66,7 +63,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define "app" do |node|
     node.vm.network "private_network", ip: "192.168.200.5"
 		node.vm.network "forwarded_port", guest: 5433, host: 5432
-		#node.vm.provision "shell", inline: 'apt-get update'
     node.vm.provision "shell", path: "bootstrap.sh"
     node.vm.hostname = "app"
 		node.vm.provider "virtualbox" do |v|
