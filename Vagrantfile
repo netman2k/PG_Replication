@@ -19,7 +19,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     node.vm.provision "shell", path: "bootstrap.sh"
     node.vm.hostname = "master"
 		node.vm.provider "virtualbox" do |v|
-			v.name = "PGPool - master"
+			v.name = "PGRepl - master"
 			v.customize [
 				"modifyvm", :id,
 				"--groups", "/PGPool",
@@ -34,7 +34,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     node.vm.provision "shell", path: "bootstrap.sh"
     node.vm.hostname = "slave1"
 		node.vm.provider "virtualbox" do |v|
-			v.name = "PGPool - slave1"
+			v.name = "PGRepl - slave1"
 			v.customize [
 				"modifyvm", :id,
 				"--groups", "/PGPool",
@@ -49,7 +49,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     node.vm.provision "shell", path: "bootstrap.sh"
     node.vm.hostname = "slave2"
 		node.vm.provider "virtualbox" do |v|
-			v.name = "PGPool - slave2"
+			v.name = "PGRepl - slave2"
 			v.customize [
 				"modifyvm", :id,
 				"--groups", "/PGPool",
@@ -66,7 +66,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     node.vm.provision "shell", path: "bootstrap.sh"
     node.vm.hostname = "app"
 		node.vm.provider "virtualbox" do |v|
-			v.name = "PGPool - app"
+			v.name = "PGRepl - app"
 			v.customize [
 				"modifyvm", :id,
 				"--groups", "/PGPool",
