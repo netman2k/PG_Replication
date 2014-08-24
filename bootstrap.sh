@@ -37,15 +37,12 @@ cp -vr /vagrant/keys/`hostname`/.ssh ~postgres/ && chown -R postgres: ~postgres/
 
 # Copy master server and app(pgpool) keys to every slaves
 echo "Copying others SSH keys..."
-if [[ `hostname` == slave* ]];then
+# preparing an authorized_keys file
+[ -f ~postgres/.ssh/authorized_keys ] && rm ~postgres/.ssh/authorized_keys
+touch ~postgres/.ssh/authorized_keys
+chown postgres: ~postgres/.ssh/authorized_keys 
 
-	# preparing an authorized_keys file
-	if [ ! -f ~postgres/.ssh/authorized_keys ];then
-		touch ~postgres/.ssh/authorized_keys
-		chown postgres: ~postgres/.ssh/authorized_keys 
-	else
-		rm ~postgres/.ssh/authorized_keys
-	fi
+if [[ `hostname` == slave* ]];then
 
 	# Copy master and pgpool server key to every slaves
 	grep -q "postgres@master" ~postgres/.ssh/authorized_keys || \
