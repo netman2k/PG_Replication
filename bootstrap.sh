@@ -33,14 +33,14 @@ cat <<EOF > /etc/hosts
 EOF
 
 echo "Copying own SSH Keys..."
-cp -vr /vagrant/keys/`hostname`/.ssh ~postgres/ && chown -R postgres: ~postgres/.ssh 
+cp -vr /vagrant/keys/`hostname`/.ssh ~postgres/ && chown -R postgres: ~postgres/.ssh
 
 # Copy master server and app(pgpool) keys to every slaves
 echo "Copying others SSH keys..."
 # preparing an authorized_keys file
 [ -f ~postgres/.ssh/authorized_keys ] && rm ~postgres/.ssh/authorized_keys
 touch ~postgres/.ssh/authorized_keys
-chown postgres: ~postgres/.ssh/authorized_keys 
+chown postgres: ~postgres/.ssh/authorized_keys
 
 if [[ `hostname` == slave* ]];then
 
@@ -76,8 +76,12 @@ Host *
 EOF
 chown postgres: ~postgres/.ssh/config
 
-echo "Initializing & start database..."
-service postgresql-9.3 initdb && service postgresql-9.3 start 
+if [ `hostname` == 'master' ];then
+  echo "Initializing & start database..."
+  service postgresql-9.3 initdb && service postgresql-9.3 start
+else
+	service postgresql-9.3 stop
+fi
 
 echo "Create backup the configuration files..."
 mv ~postgres/9.3/data/postgresql.conf{,.back}
