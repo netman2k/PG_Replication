@@ -6,21 +6,21 @@ rpm -qi vim-enhanced &> /dev/null || yum -y install vim-enhanced
 
 
 [ -f /etc/yum.repos.d/pgdg-93-redhat.repo ] || {
-	echo "Installing yum repo..."
-	yum -y install http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-redhat93-9.3-1.noarch.rpm
+  echo "Installing yum repo..."
+  yum -y install http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-redhat93-9.3-1.noarch.rpm
 }
 
 echo "Installing PostgreSQL..."
 rpm -qi postgresql93-server &> /dev/null || yum -y install postgresql93-server
 
 if [ `hostname` == 'app' ];then
-	rpm -qi nfs-utils &> /dev/null || {
-		echo "Remove conflict nfs-utils package"
-		yum -y remove nfs-utils
-	}
+  rpm -qi nfs-utils &> /dev/null || {
+    echo "Remove conflict nfs-utils package"
+    yum -y remove nfs-utils
+  }
 
-	echo "Installing PGPool-II..."
-	rpm -qi pgpool-II-93 &> /dev/null || yum -y install pgpool-II-93
+  echo "Installing PGPool-II..."
+  rpm -qi pgpool-II-93 &> /dev/null || yum -y install pgpool-II-93
 fi
 
 echo "Setting /etc/hosts..."
@@ -44,28 +44,28 @@ chown postgres: ~postgres/.ssh/authorized_keys
 
 if [[ `hostname` == slave* ]];then
 
-	# Copy master and pgpool server key to every slaves
-	grep -q "postgres@master" ~postgres/.ssh/authorized_keys || \
-		cat /vagrant/keys/master/.ssh/id_rsa.pub >> ~postgres/.ssh/authorized_keys
-	grep -q "postgres@app" ~postgres/.ssh/authorized_keys || \
-		cat /vagrant/keys/app/.ssh/id_rsa.pub >> ~postgres/.ssh/authorized_keys
+  # Copy master and pgpool server key to every slaves
+  grep -q "postgres@master" ~postgres/.ssh/authorized_keys || \
+    cat /vagrant/keys/master/.ssh/id_rsa.pub >> ~postgres/.ssh/authorized_keys
+  grep -q "postgres@app" ~postgres/.ssh/authorized_keys || \
+    cat /vagrant/keys/app/.ssh/id_rsa.pub >> ~postgres/.ssh/authorized_keys
 
-	# Copy failover server key to every slaves
-	if [[ `hostname` != 'slave1' ]];then
-		grep -q "postgres@slave1" ~postgres/.ssh/authorized_keys || \
-			cat /vagrant/keys/slave1/.ssh/id_rsa.pub >> ~postgres/.ssh/authorized_keys
-	fi
+  # Copy failover server key to every slaves
+  if [[ `hostname` != 'slave1' ]];then
+    grep -q "postgres@slave1" ~postgres/.ssh/authorized_keys || \
+      cat /vagrant/keys/slave1/.ssh/id_rsa.pub >> ~postgres/.ssh/authorized_keys
+  fi
 
-	chown postgres: ~postgres/.ssh/authorized_keys
+   chown postgres: ~postgres/.ssh/authorized_keys
 fi
 
 if [ `hostname` == 'master' ];then
-	grep -q "postgres@slave1" ~postgres/.ssh/authorized_keys || \
-		cat /vagrant/keys/slave1/.ssh/id_rsa.pub >> ~postgres/.ssh/authorized_keys
-	grep -q "postgres@app" ~postgres/.ssh/authorized_keys || \
-		cat /vagrant/keys/app/.ssh/id_rsa.pub >> ~postgres/.ssh/authorized_keys
+  grep -q "postgres@slave1" ~postgres/.ssh/authorized_keys || \
+    cat /vagrant/keys/slave1/.ssh/id_rsa.pub >> ~postgres/.ssh/authorized_keys
+  grep -q "postgres@app" ~postgres/.ssh/authorized_keys || \
+    cat /vagrant/keys/app/.ssh/id_rsa.pub >> ~postgres/.ssh/authorized_keys
 
-	chown postgres: ~postgres/.ssh/authorized_keys
+  chown postgres: ~postgres/.ssh/authorized_keys
 fi
 
 echo "Disabling Host key checking..."
@@ -80,25 +80,27 @@ if [ `hostname` == 'master' ];then
   echo "Initializing & start database..."
   service postgresql-9.3 initdb && service postgresql-9.3 start
 else
-	service postgresql-9.3 stop
+  service postgresql-9.3 stop
 fi
 
-echo "Create backup the configuration files..."
-mv ~postgres/9.3/data/postgresql.conf{,.back}
-mv ~postgres/9.3/data/pg_hba.conf{,.back}
+if [[ `hostname` =~ master|slave* ]];then
+  echo "Create backup the configuration files..."
+  mv ~postgres/9.3/data/postgresql.conf{,.back}
+  mv ~postgres/9.3/data/pg_hba.conf{,.back}
+fi
 
 if [ `hostname` != 'app' ];then
-	echo "Setting postgresql.conf..."
-	cp -vr /vagrant/postgresql/`hostname`/postgresql.conf ~postgres/9.3/data/ && chown -R postgres: ~postgres/9.3/data/postgresql.conf
+  echo "Setting postgresql.conf..."
+  cp -vr /vagrant/postgresql/`hostname`/postgresql.conf ~postgres/9.3/data/ && chown -R postgres: ~postgres/9.3/data/postgresql.conf
 
-	echo "Setting pg_hba.conf..."
-	cp -vr /vagrant/postgresql/`hostname`/pg_hba.conf ~postgres/9.3/data/ && chown -R postgres: ~postgres/9.3/data/pg_hba.conf
+  echo "Setting pg_hba.conf..."
+  cp -vr /vagrant/postgresql/`hostname`/pg_hba.conf ~postgres/9.3/data/ && chown -R postgres: ~postgres/9.3/data/pg_hba.conf
 fi
 
-echo "Create repl and pgpool accounts..."
 if [ `hostname` == 'master' ];then
-	sudo su - postgres -c "psql -c \"CREATE USER repl REPLICATION ENCRYPTED PASSWORD 'repl';\""
-	sudo su - postgres -c "psql -c \"CREATE USER pgpool LOGIN ENCRYPTED PASSWORD 'pgpool';\""
+  echo "Create repl and pgpool accounts..."
+  sudo su - postgres -c "psql -c \"CREATE USER repl REPLICATION ENCRYPTED PASSWORD 'repl';\""
+  sudo su - postgres -c "psql -c \"CREATE USER pgpool LOGIN ENCRYPTED PASSWORD 'pgpool';\""
 fi
 
 #service postgresql stop
